@@ -2,8 +2,8 @@
 
 - **Status:** ✅ Complete (Ready for Deployment)
 - **Started:** 2026-02-03
-- **Finished:** 2026-02-03
-- **URL:** [pitch.chrischoy.org](https://pitch.chrischoy.org) *(pending deployment)*
+- **Finished:** 2026-02-04
+- **URL:** [seepitch.live](https://seepitch.live) *(pending DNS configuration)*
 
 ## Overview
 
