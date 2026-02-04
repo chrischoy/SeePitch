@@ -358,12 +358,19 @@ export class CanvasRenderer {
 
     /**
      * Zoom in/out (adjust visible note range)
+     * @param {number} delta - Positive = zoom out (expand range), Negative = zoom in (shrink range)
      */
     zoom(delta) {
         const currentRange = this.maxMidiNote - this.minMidiNote;
-        // Make zoom proportional to current range (15% per delta)
-        const zoomFactor = 1 - (delta * 0.15);
-        const newRange = Math.max(6, currentRange * zoomFactor);
+
+        // Use exponential zoom: 1.2x per step
+        // delta > 0: zoom out (multiply by 1.2)
+        // delta < 0: zoom in (divide by 1.2)
+        const zoomFactor = Math.pow(1.2, delta);
+        let newRange = currentRange * zoomFactor;
+
+        // Clamp to reasonable bounds
+        newRange = Math.max(6, Math.min(120, newRange)); // 6 semitones to 10 octaves
 
         const center = (this.maxMidiNote + this.minMidiNote) / 2;
         this.minMidiNote = Math.round(center - newRange / 2);
