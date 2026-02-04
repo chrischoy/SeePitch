@@ -363,18 +363,23 @@ export class CanvasRenderer {
     zoom(delta) {
         const currentRange = this.maxMidiNote - this.minMidiNote;
 
-        // Use exponential zoom: 1.2x per step
-        // delta > 0: zoom out (multiply by 1.2)
-        // delta < 0: zoom in (divide by 1.2)
-        const zoomFactor = Math.pow(1.2, delta);
+        // Use exponential zoom with reduced sensitivity: 1.1x per step (was 1.2x)
+        // delta > 0: zoom out (multiply by 1.1)
+        // delta < 0: zoom in (divide by 1.1)
+        const zoomFactor = Math.pow(1.1, delta);
         let newRange = currentRange * zoomFactor;
 
-        // Clamp to reasonable bounds
-        newRange = Math.max(6, Math.min(120, newRange)); // 6 semitones to 10 octaves
+        // Clamp to reasonable bounds - increased max to allow more zoom out
+        const minRange = 6; // Half octave
+        const maxRange = 72; // 6 octaves (was 10, too much)
+        newRange = Math.max(minRange, Math.min(maxRange, newRange));
 
         const center = (this.maxMidiNote + this.minMidiNote) / 2;
         this.minMidiNote = Math.round(center - newRange / 2);
         this.maxMidiNote = Math.round(center + newRange / 2);
+
+        // Debug logging
+        console.log(`Zoom: delta=${delta}, range: ${currentRange.toFixed(1)} → ${newRange.toFixed(1)} (${this.minMidiNote}-${this.maxMidiNote})`);
     }
 
     /**
