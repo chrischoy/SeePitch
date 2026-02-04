@@ -56,6 +56,9 @@ class VoicePitchVisualizer {
     // Initialize pitch detector with microphone sample rate
     this.pitchDetector = new PitchDetector(this.microphone.getSampleRate());
 
+    // Pass pitch detector to floating menu for sensitivity control
+    this.floatingMenu.pitchDetector = this.pitchDetector;
+
     // Start rendering loop
     this.isRunning = true;
     this.loop();
@@ -73,7 +76,8 @@ class VoicePitchVisualizer {
       // Only detect pitch if audio is above noise threshold
       let frequency = null;
 
-      if (this.microphone.isAboveNoiseThreshold(0.01)) {
+      // Lowered threshold from 0.01 to 0.005 for better low-frequency detection
+      if (this.microphone.isAboveNoiseThreshold(0.005)) {
         frequency = this.pitchDetector.detectPitch(buffer);
       }
 

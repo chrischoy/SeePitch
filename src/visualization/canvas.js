@@ -134,7 +134,7 @@ export class CanvasRenderer {
         this.minMidiNote = Math.round(centerMidi - rangeInSemitones / 2);
         this.maxMidiNote = Math.round(centerMidi + rangeInSemitones / 2);
 
-        console.log(`🎯 Auto-ranged to ${this.minMidiNote}-${this.maxMidiNote} MIDI (centered on ${Math.round(avgFreq)}Hz)`);
+        console.log(`* Auto-ranged to ${this.minMidiNote}-${this.maxMidiNote} MIDI (centered on ${Math.round(avgFreq)}Hz)`);
     }
 
     /**
@@ -177,10 +177,24 @@ export class CanvasRenderer {
      * Draw musical grid (horizontal lines for each note)
      */
     drawGrid() {
-        const notes = getNoteRange(this.minMidiNote, this.maxMidiNote);
+        // Ensure MIDI numbers are valid integers
+        const minMidi = Math.round(this.minMidiNote);
+        const maxMidi = Math.round(this.maxMidiNote);
+
+        if (!Number.isFinite(minMidi) || !Number.isFinite(maxMidi) || minMidi >= maxMidi) {
+            console.warn('[Canvas] Invalid MIDI range for grid:', minMidi, maxMidi);
+            return;
+        }
+
+        const notes = getNoteRange(minMidi, maxMidi);
         const labelWidth = 60; // Space for note labels on left
 
         notes.forEach(noteInfo => {
+            // Safety check
+            if (!noteInfo || !noteInfo.frequency || !Number.isFinite(noteInfo.frequency)) {
+                return;
+            }
+
             const y = this.frequencyToY(noteInfo.frequency);
 
             // Bold line for C notes (octave boundaries)
@@ -199,7 +213,16 @@ export class CanvasRenderer {
      * Draw note labels on left side
      */
     drawNoteLabels() {
-        const notes = getNoteRange(this.minMidiNote, this.maxMidiNote);
+        // Ensure MIDI numbers are valid integers
+        const minMidi = Math.round(this.minMidiNote);
+        const maxMidi = Math.round(this.maxMidiNote);
+
+        if (!Number.isFinite(minMidi) || !Number.isFinite(maxMidi) || minMidi >= maxMidi) {
+            console.warn('[Canvas] Invalid MIDI range:', minMidi, maxMidi);
+            return;
+        }
+
+        const notes = getNoteRange(minMidi, maxMidi);
 
         this.ctx.fillStyle = this.colors.noteLabel;
         this.ctx.font = '11px "Courier New", monospace';
@@ -207,6 +230,11 @@ export class CanvasRenderer {
         this.ctx.textBaseline = 'middle';
 
         notes.forEach(noteInfo => {
+            // Safety check
+            if (!noteInfo || !noteInfo.frequency || !Number.isFinite(noteInfo.frequency)) {
+                return;
+            }
+
             const y = this.frequencyToY(noteInfo.frequency);
 
             // Only show labels for natural notes and C# to avoid clutter
@@ -377,9 +405,6 @@ export class CanvasRenderer {
         const center = (this.maxMidiNote + this.minMidiNote) / 2;
         this.minMidiNote = Math.round(center - newRange / 2);
         this.maxMidiNote = Math.round(center + newRange / 2);
-
-        // Debug logging
-        console.log(`Zoom: delta=${delta}, range: ${currentRange.toFixed(1)} → ${newRange.toFixed(1)} (${this.minMidiNote}-${this.maxMidiNote})`);
     }
 
     /**

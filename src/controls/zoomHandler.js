@@ -26,10 +26,11 @@ export class ZoomHandler {
                 this.isPanning = false;
                 e.preventDefault();
             } else if (this.touches.length === 1) {
-                // Single finger - prepare for pan
+                // Single finger - DON'T enable pan immediately
+                // Wait to see if user is trying to zoom or just tapping
                 this.lastTouchY = this.touches[0].clientY;
-                this.isPanning = true;
-                e.preventDefault();
+                this.isPanning = false; // Don't enable pan on first touch
+                // Allow default behavior (don't prevent)
             }
         }, { passive: false });
 
@@ -49,17 +50,23 @@ export class ZoomHandler {
 
                 this.lastDistance = currentDistance;
                 e.preventDefault();
-            } else if (this.touches.length === 1 && this.isPanning) {
+            } else if (this.touches.length === 1 && this.lastTouchY !== null) {
                 // Single-finger vertical pan
                 const currentY = this.touches[0].clientY;
+                const deltaY = currentY - this.lastTouchY;
 
-                if (this.lastTouchY !== null) {
-                    const deltaY = currentY - this.lastTouchY;
+                // Only enable pan if movement is significant (> 20px)
+                // This prevents accidental panning during taps
+                if (!this.isPanning && Math.abs(deltaY) > 20) {
+                    this.isPanning = true;
+                }
+
+                if (this.isPanning) {
                     this.renderer.pan(deltaY);
+                    e.preventDefault(); // Only prevent default when actually panning
                 }
 
                 this.lastTouchY = currentY;
-                e.preventDefault();
             }
         }, { passive: false });
 

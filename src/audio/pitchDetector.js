@@ -6,20 +6,58 @@
 export class PitchDetector {
     constructor(sampleRate = 44100) {
         this.sampleRate = sampleRate;
-        this.bufferSize = 4096;
-        this.threshold = 0.1; // YIN threshold for pitch detection
+        this.bufferSize = 8192; // Increased from 4096 for better low-frequency detection
+        this.threshold = 0.15; // YIN threshold for pitch detection (lower = more sensitive)
 
         // Smoothing parameters
         this.smoothingFactor = 0.3; // 0 = no smoothing, 1 = max smoothing
         this.lastPitch = null;
+
+        // Debug: Log sample rate
+        console.log(`[PitchDetector] Initialized with sample rate: ${sampleRate}Hz, buffer: ${this.bufferSize}, YIN threshold: ${this.threshold}`);
     }
 
     /**
-     * Detect pitch from audio buffer using simplified autocorrelation
+     * Detect pitch from audio buffer using hybrid approach
+     * Tries FFT first (more robust on iOS), fallback to YIN
      * @param {Float32Array} buffer - Audio samples
+     * @param {AnalyserNode} analyser - Optional analyser for FFT method
      * @returns {number|null} Frequency in Hz, or null if no pitch detected
      */
-    detectPitch(buffer) {
+    detectPitch(buffer, analyser = null) {
+        let pitch = null;
+
+        // Try FFT-based detection first (better for iOS)
+        if (analyser) {
+            pitch = this._detectPitchFFT(analyser);
+        }
+
+        // Fallback to YIN if FFT fails or unavailable
+        if (!pitch) {
+            pitch = this._detectPitchYIN(buffer);
+        }
+
+        // Filter out unrealistic frequencies
+        if (pitch && (pitch < 50 || pitch > 2000)) {
+            return null;
+        }
+
+        // Apply smoothing
+        if (pitch && this.lastPitch !== null) {
+            pitch = this.lastPitch * this.smoothingFactor + pitch * (1 - this.smoothingFactor);
+        }
+
+        if (pitch) {
+            this.lastPitch = pitch;
+        }
+
+        return pitch;
+    }
+
+    /**
+     * YIN-based pitch detection (original method)
+     */
+    _detectPitchYIN(buffer) {
         // Step 1: Difference function (simplified YIN)
         const yinBuffer = this._differenceFunction(buffer);
 
@@ -40,7 +78,8 @@ export class PitchDetector {
         let pitch = this.sampleRate / betterTau;
 
         // Filter out unrealistic frequencies for human voice
-        if (pitch < 60 || pitch > 2000) {
+        // Extended low range from 60 to 50 Hz to better capture bass voices
+        if (pitch < 50 || pitch > 2000) {
             return null;
         }
 
@@ -91,8 +130,9 @@ export class PitchDetector {
      * Find first tau below threshold (step 3 of YIN)
      */
     _absoluteThreshold(cmndf) {
-        // Start searching from a minimum period (corresponding to max freq ~2000Hz)
-        const minTau = Math.floor(this.sampleRate / 2000);
+        // Start searching from a minimum period (corresponding to max freq ~1000Hz)
+        // Lowered from 2000Hz to allow algorithm to search for higher frequencies better
+        const minTau = Math.floor(this.sampleRate / 1000);
 
         for (let tau = minTau; tau < cmndf.length; tau++) {
             if (cmndf[tau] < this.threshold) {

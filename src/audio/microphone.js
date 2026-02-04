@@ -34,7 +34,7 @@ export class Microphone {
 
             // Create analyser node
             this.analyser = this.audioContext.createAnalyser();
-            this.analyser.fftSize = 4096; // Larger FFT for better low-frequency resolution
+            this.analyser.fftSize = 8192; // Match pitch detector buffer size
             this.analyser.smoothingTimeConstant = 0; // No smoothing (we'll handle that ourselves)
 
             // Create buffer for time-domain audio data
@@ -45,7 +45,25 @@ export class Microphone {
             this.microphone.connect(this.analyser);
 
             this.isActive = true;
-            console.log('🎤 Microphone started successfully');
+
+            // Debug: Log actual sample rate (may differ from requested on iOS)
+            console.log(`🎤 Microphone started successfully`);
+            console.log(`[Microphone] Requested: 44100 Hz, Actual: ${this.audioContext.sampleRate} Hz`);
+            console.log(`[Microphone] FFT size: ${this.analyser.fftSize}, Buffer size: ${this.buffer.length}`);
+
+            // Check if iOS mic track has different sample rate than AudioContext
+            const track = stream.getAudioTracks()[0];
+            const settings = track.getSettings();
+            console.log(`[Microphone] Track settings:`, settings);
+
+            // Store the ACTUAL microphone sample rate (may differ from AudioContext on iOS)
+            this.actualSampleRate = settings.sampleRate || this.audioContext.sampleRate;
+
+            if (settings.sampleRate && settings.sampleRate !== this.audioContext.sampleRate) {
+                console.warn(`⚠️ SAMPLE RATE MISMATCH!`);
+                console.warn(`⚠️ Track: ${settings.sampleRate} Hz, Context: ${this.audioContext.sampleRate} Hz`);
+                console.warn(`⚠️ Using track sample rate ${this.actualSampleRate} Hz for pitch detection`);
+            }
 
         } catch (error) {
             console.error('Failed to start microphone:', error);
@@ -114,11 +132,19 @@ export class Microphone {
     }
 
     /**
-     * Get audio context sample rate
+     * Get actual microphone sample rate (may differ from AudioContext on iOS)
      * @returns {number} Sample rate in Hz
      */
     getSampleRate() {
-        return this.audioContext?.sampleRate || 44100;
+        return this.actualSampleRate || this.audioContext?.sampleRate || 44100;
+    }
+
+    /**
+     * Get analyser node for FFT-based pitch detection
+     * @returns {AnalyserNode|null}
+     */
+    getAnalyser() {
+        return this.analyser;
     }
 
     /**

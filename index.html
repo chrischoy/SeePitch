@@ -8,6 +8,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Voice Pitch Visualizer</title>
+
+  <!-- Mobile debug console (eruda) - add ?debug=1 to URL to activate -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    if (window.location.search.includes('debug=1')) {
+      eruda.init();
+    }
+  </script>
 </head>
 
 <body>
@@ -26,6 +34,10 @@
       <div class="control-group">
         <label for="gapTolerance">Gap Tolerance: <span id="gapToleranceValue">3</span></label>
         <input type="range" id="gapTolerance" min="1" max="10" value="3" step="1" />
+      </div>
+      <div class="control-group">
+        <label for="sensitivity">Sensitivity: <span id="sensitivityValue">-100</span> dB</label>
+        <input type="range" id="sensitivity" min="-120" max="-40" value="-100" step="5" />
       </div>
       <div class="control-group">
         <label>Mode</label>

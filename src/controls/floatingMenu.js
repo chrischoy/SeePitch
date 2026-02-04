@@ -3,8 +3,9 @@
  */
 
 export class FloatingMenu {
-    constructor(renderer) {
+    constructor(renderer, pitchDetector = null) {
         this.renderer = renderer;
+        this.pitchDetector = pitchDetector;
 
         // DOM elements
         this.menuContainer = document.getElementById('floatingMenu');
@@ -14,6 +15,8 @@ export class FloatingMenu {
         this.timeWindowValue = document.getElementById('timeWindowValue');
         this.gapToleranceSlider = document.getElementById('gapTolerance');
         this.gapToleranceValue = document.getElementById('gapToleranceValue');
+        this.sensitivitySlider = document.getElementById('sensitivity');
+        this.sensitivityValue = document.getElementById('sensitivityValue');
         this.visualModeSelect = document.getElementById('visualMode');
         this.targetPitchGroup = document.getElementById('targetPitchGroup');
         this.targetNoteSelect = document.getElementById('targetNote');
@@ -41,6 +44,18 @@ export class FloatingMenu {
             const value = parseInt(e.target.value);
             this.gapToleranceValue.textContent = value;
             this.renderer.setGapThreshold(value);
+        });
+
+        // Sensitivity adjustment
+        this.sensitivitySlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.sensitivityValue.textContent = value;
+            if (this.pitchDetector) {
+                // Map slider value to YIN threshold (inverted: higher slider = more sensitive)
+                // Slider: -120 to -40, map to YIN threshold: 0.3 to 0.05
+                const yinThreshold = 0.3 - ((value + 120) / 80) * 0.25;
+                this.pitchDetector.threshold = yinThreshold;
+            }
         });
 
         // Visual mode selection
