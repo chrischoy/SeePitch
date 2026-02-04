@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Voice Pitch Visualizer</title>
+</head>
+
+<body>
+  <!-- Main canvas for pitch visualization -->
+  <canvas id="pitchCanvas"></canvas>
+
+  <!-- Floating controls (top-right corner) -->
+  <div id="floatingMenu" class="floating-menu collapsed">
+    <button id="menuToggle" class="menu-toggle" aria-label="Toggle controls">⚙️</button>
+    <div id="menuPanel" class="menu-panel">
+      <h3>Controls</h3>
+      <div class="control-group">
+        <label for="timeWindow">Time Window: <span id="timeWindowValue">10</span>s</label>
+        <input type="range" id="timeWindow" min="5" max="30" value="10" step="5" />
+      </div>
+      <div class="control-group">
+        <label for="gapTolerance">Gap Tolerance: <span id="gapToleranceValue">3</span></label>
+        <input type="range" id="gapTolerance" min="1" max="10" value="3" step="1" />
+      </div>
+      <div class="control-group">
+        <label>Mode</label>
+        <select id="visualMode">
+          <option value="normal">Normal</option>
+          <option value="target">Target Pitch</option>
+          <option value="range">Range Display</option>
+        </select>
+      </div>
+      <div class="control-group" id="targetPitchGroup" style="display: none;">
+        <label for="targetNote">Target Note</label>
+        <select id="targetNote">
+          <option value="C4">C4 (261.63 Hz)</option>
+          <option value="D4">D4 (293.66 Hz)</option>
+          <option value="E4">E4 (329.63 Hz)</option>
+          <option value="F4">F4 (349.23 Hz)</option>
+          <option value="G4">G4 (392.00 Hz)</option>
+          <option value="A4" selected>A4 (440.00 Hz)</option>
+          <option value="B4">B4 (493.88 Hz)</option>
+          <option value="C5">C5 (523.25 Hz)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start button overlay (iOS requires user gesture) -->
+  <div id="startOverlay" class="start-overlay">
+    <button id="startButton" class="start-button">
+      🎤 Tap to Start
+    </button>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

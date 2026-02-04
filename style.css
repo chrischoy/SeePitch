@@ -1,0 +1,229 @@
+/* ========================================
+   Voice Pitch Visualizer - Mobile-First Styles
+   ======================================== */
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #0a0a0a;
+  color: #ffffff;
+  touch-action: none; /* Prevent default touch behaviors */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Canvas */
+#pitchCanvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0a;
+}
+
+/* ========================================
+   Floating Menu (Top-Right Corner)
+   ======================================== */
+
+.floating-menu {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+
+.menu-toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(20, 20, 20, 0.9);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.menu-toggle:active {
+  transform: scale(0.95);
+  background: rgba(30, 30, 30, 0.95);
+}
+
+.menu-panel {
+  display: none;
+  position: absolute;
+  top: 64px;
+  right: 0;
+  min-width: 280px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+}
+
+.floating-menu:not(.collapsed) .menu-panel {
+  display: block;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-panel h3 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.control-group {
+  margin-bottom: 16px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ff88;
+  cursor: pointer;
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ff88;
+  cursor: pointer;
+  border: none;
+}
+
+.control-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(40, 40, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+}
+
+.control-group select:focus {
+  border-color: #00ff88;
+}
+
+/* ========================================
+   Start Overlay (iOS Audio Context)
+   ======================================== */
+
+.start-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.start-overlay.hidden {
+  display: none;
+}
+
+.start-button {
+  min-width: 200px;
+  padding: 20px 40px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+  color: #0a0a0a;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.4);
+  transition: all 0.3s ease;
+}
+
+.start-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+/* Portrait mode (default mobile) */
+@media (orientation: portrait) {
+  .menu-panel {
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* Landscape mode */
+@media (orientation: landscape) {
+  .floating-menu {
+    top: 12px;
+    right: 12px;
+  }
+  
+  .menu-toggle {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .menu-panel {
+    top: 56px;
+  }
+}
+
+/* Desktop/larger screens */
+@media (min-width: 768px) {
+  .menu-panel {
+    min-width: 320px;
+  }
+}
