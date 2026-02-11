@@ -39,12 +39,17 @@ export class PitchDetector {
 
         // Filter out unrealistic frequencies
         if (pitch && (pitch < 50 || pitch > 2000)) {
+            console.log(`[PitchDetector] Filtered out unrealistic frequency: ${pitch.toFixed(2)} Hz`);
             return null;
         }
 
         // Apply smoothing
         if (pitch && this.lastPitch !== null) {
+            const rawPitch = pitch;
             pitch = this.lastPitch * this.smoothingFactor + pitch * (1 - this.smoothingFactor);
+            console.log(`[PitchDetector] Raw: ${rawPitch.toFixed(2)} Hz, Smoothed: ${pitch.toFixed(2)} Hz, SampleRate: ${this.sampleRate} Hz`);
+        } else if (pitch) {
+            console.log(`[PitchDetector] Detected: ${pitch.toFixed(2)} Hz, SampleRate: ${this.sampleRate} Hz`);
         }
 
         if (pitch) {
@@ -76,6 +81,8 @@ export class PitchDetector {
 
         // Convert period (tau) to frequency
         let pitch = this.sampleRate / betterTau;
+
+        console.log(`[YIN] tau=${tau}, betterTau=${betterTau.toFixed(2)}, sampleRate=${this.sampleRate}, pitch=${pitch.toFixed(2)} Hz`);
 
         // Filter out unrealistic frequencies for human voice
         // Extended low range from 60 to 50 Hz to better capture bass voices
@@ -130,9 +137,9 @@ export class PitchDetector {
      * Find first tau below threshold (step 3 of YIN)
      */
     _absoluteThreshold(cmndf) {
-        // Start searching from a minimum period (corresponding to max freq ~1000Hz)
-        // Lowered from 2000Hz to allow algorithm to search for higher frequencies better
-        const minTau = Math.floor(this.sampleRate / 1000);
+        // Start searching from a minimum period (corresponding to max freq ~500Hz)
+        // This helps avoid octave errors where we detect the sub-harmonic
+        const minTau = Math.floor(this.sampleRate / 500);
 
         for (let tau = minTau; tau < cmndf.length; tau++) {
             if (cmndf[tau] < this.threshold) {

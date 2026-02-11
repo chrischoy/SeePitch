@@ -154,6 +154,47 @@ Uses the **YIN algorithm** with 4-step process:
 - `src/visualization/canvas.js` - Canvas rendering engine
 - `src/controls/floatingMenu.js` - UI controls
 
+### Mobile Debugging
+
+To test on iPhone/mobile devices before deploying:
+
+**1. Update vite.config.js to allow tunnel hosts:**
+```js
+server: {
+    host: true,
+    port: 3000,
+    allowedHosts: ['.trycloudflare.com'], // Or '.ngrok-free.app' for ngrok
+}
+```
+
+**2. Start dev server and tunnel:**
+
+**Option A: Cloudflare Tunnel (recommended - free, no account needed)**
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2
+cloudflared tunnel --url http://localhost:3000
+```
+
+**Option B: ngrok**
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2
+ngrok http 3000
+```
+
+**3. Access the tunnel URL on your mobile device**
+- Cloudflare: Look for `https://*.trycloudflare.com` in output
+- ngrok: Look for `https://*.ngrok-free.app` in output
+
+**4. Use on-screen console viewer**
+- The dev build includes a mobile console viewer (bottom-right "📋 Console" button)
+- View debug logs directly on your phone without needing Safari dev tools
+
 ### Adding Features
 
 To add vibrato analysis or other enhancements, see the implementation plan in `/brain/implementation_plan.md`

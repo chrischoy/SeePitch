@@ -56,13 +56,14 @@ export class Microphone {
             const settings = track.getSettings();
             console.log(`[Microphone] Track settings:`, settings);
 
-            // Store the ACTUAL microphone sample rate (may differ from AudioContext on iOS)
-            this.actualSampleRate = settings.sampleRate || this.audioContext.sampleRate;
-
+            // Always use AudioContext sample rate for pitch detection, because the
+            // AnalyserNode outputs data resampled to the AudioContext rate — NOT the
+            // mic track's native rate. Using the track rate causes pitch to read sharp
+            // on iOS where the hardware runs at 48000 but AudioContext may use 44100.
             if (settings.sampleRate && settings.sampleRate !== this.audioContext.sampleRate) {
-                console.warn(`⚠️ SAMPLE RATE MISMATCH!`);
+                console.warn(`⚠️ SAMPLE RATE MISMATCH (informational only)`);
                 console.warn(`⚠️ Track: ${settings.sampleRate} Hz, Context: ${this.audioContext.sampleRate} Hz`);
-                console.warn(`⚠️ Using track sample rate ${this.actualSampleRate} Hz for pitch detection`);
+                console.warn(`⚠️ Using AudioContext rate ${this.audioContext.sampleRate} Hz for pitch detection (AnalyserNode resamples)`);
             }
 
         } catch (error) {
@@ -136,7 +137,9 @@ export class Microphone {
      * @returns {number} Sample rate in Hz
      */
     getSampleRate() {
-        return this.actualSampleRate || this.audioContext?.sampleRate || 44100;
+        // Always use AudioContext sample rate — the AnalyserNode data is at this rate,
+        // regardless of the mic track's native hardware sample rate.
+        return this.audioContext?.sampleRate || 44100;
     }
 
     /**

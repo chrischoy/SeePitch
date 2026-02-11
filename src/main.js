@@ -9,6 +9,7 @@ import { PitchDetector } from './audio/pitchDetector.js';
 import { CanvasRenderer } from './visualization/canvas.js';
 import { FloatingMenu } from './controls/floatingMenu.js';
 import { ZoomHandler } from './controls/zoomHandler.js';
+import { ConsoleViewer } from './utils/consoleViewer.js';
 
 class VoicePitchVisualizer {
   constructor() {
@@ -25,6 +26,11 @@ class VoicePitchVisualizer {
   }
 
   init() {
+    // Setup mobile console viewer for debugging (dev mode only)
+    if (import.meta.env.DEV) {
+      new ConsoleViewer();
+    }
+
     // Setup controls
     this.floatingMenu = new FloatingMenu(this.renderer);
     this.zoomHandler = new ZoomHandler(

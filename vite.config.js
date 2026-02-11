@@ -11,5 +11,6 @@ export default defineConfig({
     server: {
         host: true, // Allow access from network
         port: 3000,
+        allowedHosts: ['.trycloudflare.com'], // Allow Cloudflare tunnel hosts for debugging
     },
 })

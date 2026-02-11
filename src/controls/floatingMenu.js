@@ -52,8 +52,8 @@ export class FloatingMenu {
             this.sensitivityValue.textContent = value;
             if (this.pitchDetector) {
                 // Map slider value to YIN threshold (inverted: higher slider = more sensitive)
-                // Slider: -120 to -40, map to YIN threshold: 0.3 to 0.05
-                const yinThreshold = 0.3 - ((value + 120) / 80) * 0.25;
+                // Slider: -160 to -40, map to YIN threshold: 0.3 to 0.05
+                const yinThreshold = 0.3 - ((value + 160) / 120) * 0.25;
                 this.pitchDetector.threshold = yinThreshold;
             }
         });
